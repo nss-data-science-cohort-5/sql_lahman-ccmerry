@@ -57,11 +57,67 @@ WHERE trunc(yearid,-1) >= 1920
 GROUP BY decade
 ORDER BY decade
 
+--Strikeouts are increasing
 
---4. Find the player who had the most success stealing bases in 2016, where __success__ is measured as the percentage of stolen base attempts which are successful. (A stolen base attempt results either in a stolen base or being caught stealing.) Consider only players who attempted _at least_ 20 stolen bases. Report the players' names, number of stolen bases, number of attempts, and stolen base percentage.
+
+--4. Find the player who had the most success stealing bases in 2016, 
+--where __success__ is measured as the percentage of stolen base attempts which are successful. 
+--(A stolen base attempt results either in a stolen base or being caught stealing.) 
+--Consider only players who attempted _at least_ 20 stolen bases. Report the players' names, 
+--number of stolen bases, number of attempts, and stolen base percentage.
+SELECT batting.playerid, people.namefirst, people.namelast, SUM(sb) / (SUM(cs) + SUM(sb) +0.00) AS sbpct
+FROM batting
+	LEFT JOIN people
+	ON batting.playerid = people.playerid
+WHERE yearid = 2016
+GROUP BY batting.playerid, people.namefirst, people.namelast
+HAVING (SUM(cs) + SUM(sb)) >= 20
+ORDER BY sbpct DESC
+
+--Chris Owings
 
 
---5. From 1970 to 2016, what is the largest number of wins for a team that did not win the world series? What is the smallest number of wins for a team that did win the world series? Doing this will probably result in an unusually small number of wins for a world series champion; determine why this is the case. Then redo your query, excluding the problem year. How often from 1970 to 2016 was it the case that a team with the most wins also won the world series? What percentage of the time?
+--5. From 1970 to 2016, what is the largest number of wins for a team that did not win the world series?
+SELECT teamid, w
+FROM teams
+WHERE yearid BETWEEN 1970 AND 2016
+AND wswin = 'N'
+ORDER BY w DESC
+LIMIT 1
+
+--116
+
+
+--What is the smallest number of wins for a team that did win the world series? 
+SELECT teamid, w, l, yearid
+FROM teams
+WHERE yearid BETWEEN 1970 AND 2016
+AND wswin = 'Y'
+ORDER BY w
+LIMIT 1
+
+--63There were fewer games due to MLB strike
+
+--Doing this will probably result in an unusually small number of wins for a world series champion; 
+--determine why this is the case. Then redo your query, excluding the problem year. 
+
+--There were fewer games due to MLB strike
+SELECT teamid, w, yearid
+FROM teams
+WHERE yearid BETWEEN 1970 AND 2016
+AND yearid != 1981
+AND wswin = 'Y'
+ORDER BY w
+LIMIT 1
+
+--How often from 1970 to 2016 was it the case that a team with the most wins also won the world series? 
+--What percentage of the time?
+SELECT teamid, w, yearid
+FROM teams
+WHERE yearid BETWEEN 1970 AND 2016
+AND wswin = 'Y'
+ORDER BY w
+
 
 --6. Which managers have won the TSN Manager of the Year award in both the National League (NL) and the American League (AL)? Give their full name and the teams that they were managing when they won the award.
 
